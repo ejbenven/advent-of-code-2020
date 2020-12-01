@@ -2,8 +2,9 @@
 #include <fstream>
 #include <string>
 #include <unordered_set>
+#include <tuple>
 
-bool reach_target(unsigned int target, std::unordered_set<unsigned int> &numbers);
+std::tuple<bool, unsigned int, unsigned int> reach_target(unsigned int target, std::unordered_set<unsigned int> &numbers);
 
 int main() {
     std::ifstream input;
@@ -15,21 +16,38 @@ int main() {
         numbers.insert(std::stoul(line));
     }
 
-    reach_target(2020, numbers);
+    //Part 1
+    {
+        auto ans = reach_target(2020, numbers);
+        if(std::get<0>(ans)){
+            std::cout << std::get<1>(ans) << " * " << std::get<2>(ans) << " = " << std::get<1>(ans) * std::get<2>(ans) << std::endl;
+        }
+    }
+
+    //Part 2
+    auto numbers_cpy = numbers;
+    for(auto num : numbers) {
+        auto search = numbers_cpy.find(num);
+        numbers_cpy.erase(search);
+        auto ans = reach_target(2020 - num, numbers_cpy);
+        if(std::get<0>(ans)) {
+            std::cout << std::get<1>(ans) << " * " << std::get<2>(ans) << " * " << num << " = " << std::get<1>(ans) * std::get<2>(ans) * num << std::endl;
+            break;
+        }
+        numbers_cpy.insert(num);
+    }
 
     input.close();
     return 0;
 }
 
-bool reach_target(unsigned int target, std::unordered_set<unsigned int> &numbers)
+std::tuple<bool, unsigned int, unsigned int> reach_target(unsigned int target, std::unordered_set<unsigned int> &numbers)
 {
     for (auto num : numbers) {
         auto search = numbers.find(target - num);
         if(search != numbers.end()) {
-            std::cout << "Results " << num << " " << target - num << std::endl;
-            std::cout << "Multiplied = " << num * (target - num) << std::endl;
-            return true;
+            return std::make_tuple(true, num, target - num);
         }
     }
-    return false;
+    return std::make_tuple(false, 0, 0);
 }
