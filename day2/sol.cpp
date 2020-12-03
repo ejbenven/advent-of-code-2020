@@ -24,7 +24,7 @@ bool validatePart2(password_tokens_t tokens);
 
 int main() {
     std::ifstream input;
-    input.open("input.txt");
+    input.open("day2/input.txt");
 
     std::string line;
     auto validPassCnt = 0;

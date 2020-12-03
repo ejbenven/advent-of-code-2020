@@ -8,7 +8,7 @@ std::tuple<bool, unsigned int, unsigned int> reach_target(unsigned int target, s
 
 int main() {
     std::ifstream input;
-    input.open("input.txt");
+    input.open("day1/input.txt");
 
     std::unordered_set<unsigned int> numbers;
     std::string line;
