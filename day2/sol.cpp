@@ -19,7 +19,8 @@ struct password_tokens_t {
 
 password_tokens_t parse(string line);
 vector<string> split(string line, string token);
-bool validate(password_tokens_t tokens);
+bool validatePart1(password_tokens_t tokens);
+bool validatePart2(password_tokens_t tokens);
 
 int main() {
     std::ifstream input;
@@ -29,7 +30,8 @@ int main() {
     auto validPassCnt = 0;
     while(std::getline(input, line)) {
         auto passwordTokens = parse(line);
-        validPassCnt += validate(passwordTokens);
+        //validPassCnt += validatePart1(passwordTokens);
+        validPassCnt += validatePart2(passwordTokens);
     }
 
     cout << validPassCnt << " valid password(s)" << endl;
@@ -38,7 +40,7 @@ int main() {
     return 0;
 }
 
-bool validate(password_tokens_t tokens)
+bool validatePart1(password_tokens_t tokens)
 {
     auto cnt = 0;
 
@@ -47,6 +49,13 @@ bool validate(password_tokens_t tokens)
     }
 
     return (cnt >= get<0>(tokens.minmax)) and (cnt <= get<1>(tokens.minmax));
+}
+
+bool validatePart2(password_tokens_t tokens)
+{
+    return ((tokens.letter == tokens.password.at(get<0>(tokens.minmax) - 1)) or
+        (tokens.letter == tokens.password.at(get<1>(tokens.minmax) - 1))) and
+        (tokens.password.at(get<0>(tokens.minmax) - 1) != tokens.password.at(get<1>(tokens.minmax) - 1));
 }
 
 password_tokens_t parse(string line)
