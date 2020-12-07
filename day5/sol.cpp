@@ -2,10 +2,12 @@
 #include <fstream>
 #include <string>
 #include <algorithm>
+#include <vector>
 
 using std::string;
 using std::cout;
 using std::endl;
+using std::vector;
 
 struct seat_t {
     unsigned int row;
@@ -22,12 +24,21 @@ int main() {
 
     string line;
     unsigned int maxId = 0;
+    vector<unsigned int> ids{};
     while(std::getline(input, line)) {
         auto seat = parse(line);
         auto id = seat.row * 8 + seat.col;
         maxId = std::max(id, maxId);
+        ids.push_back(id);
     }
 
+    std::sort(ids.begin(), ids.end());
+    auto j = 0;
+    for(auto i = 1; i < ids.size(); i++, j++) {
+        if (ids[i] != ids[j] + 1) {
+            cout << "j: " << ids[j] << " i: " << ids[i] << endl;
+        }
+    }
     cout << "maxId: " << maxId << endl;
 
     return 0;
