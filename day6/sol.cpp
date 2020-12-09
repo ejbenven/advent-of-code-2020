@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <unordered_set>
+#include <algorithm>
 
 using std::string;
 using std::cout;
@@ -35,6 +36,8 @@ int main() {
     }
 
     cout << "sum: " << counts << endl;
+
+    input.close();
 
     return 0;
 }

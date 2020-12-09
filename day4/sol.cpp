@@ -47,6 +47,10 @@ int main() {
 
     cout << validCnt << " valid passport(s)" << endl;
 
+    input.close();
+
+    return 0;
+
 }
 
 bool validate2(vector<string> lines)

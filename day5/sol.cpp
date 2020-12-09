@@ -41,6 +41,8 @@ int main() {
     }
     cout << "maxId: " << maxId << endl;
 
+    input.close();
+
     return 0;
 }
 
