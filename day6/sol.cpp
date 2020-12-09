@@ -15,7 +15,6 @@ int main() {
     std::ifstream input;
     input.open("day6/input.txt");
 
-
     string line;
     string group = "";
     auto counts = 0;
@@ -35,8 +34,43 @@ int main() {
         group = "";
     }
 
-    cout << "sum: " << counts << endl;
+    cout << "Part1: " << counts << endl;
 
+    input.close();
+    input.open("day6/input.txt");
+
+    counts = 0;
+    unordered_set<char> groupAns{};
+    group = "";
+
+    while(std::getline(input, line)) {
+        if(line == "" and group.size() != 0) {
+            counts += groupAns.size();
+            groupAns.clear();
+            group = "";
+        } else if (group.size() == 0){
+            group += line;
+            groupAns = parse(line);
+        } else {
+            auto individualAns = parse(line);
+            unordered_set<char> out;
+            for (auto c : individualAns) {
+                if (groupAns.contains(c)) {
+                    out.insert(c);
+                }
+            }
+            groupAns = out;
+            group += line;
+        }
+    }
+
+    if (group != "") {
+        counts += groupAns.size();
+        groupAns.clear();
+        group = "";
+    }
+
+    cout << "Part 2: " << counts << endl;
     input.close();
 
     return 0;
