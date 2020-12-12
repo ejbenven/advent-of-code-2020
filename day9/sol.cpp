@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <unordered_map>
+#include <vector>
 #include <deque>
 
 using std::string;
@@ -9,8 +10,9 @@ using std::cout;
 using std::endl;
 using std::unordered_map;
 using std::deque;
+using std::vector;
 
-bool validate(unordered_map<int, int> & counts, int target);
+bool validate(unordered_map<long int, long int> & counts, long int target);
 
 int main() {
     std::ifstream input;
@@ -18,15 +20,20 @@ int main() {
     //input.open("day9/test_input.txt");
 
     string line;
-    unordered_map<int, int> counts;
-    deque<int> window;
+    unordered_map<long int, long int> counts;
+    deque<long int> window;
     const unsigned int windowSize = 25;
+    long int target;
+    bool found = false;
+    vector<long int> numbers;
     while(std::getline(input, line)) {
-        auto num = std::stoi(line);
+        auto num = std::stol(line);
+        numbers.push_back(num);
 
-        if (window.size() == windowSize && not validate(counts, num)) {
+        if (not found and window.size() == windowSize and not validate(counts, num)) {
             cout << "First non-compliant number is " << num << endl;
-            break;
+            target = num;
+            found = true;
         }
 
         window.push_front(num);
@@ -49,10 +56,36 @@ int main() {
 
     input.close();
 
+    window.clear();
+    long int sum = 0;
+    for (auto n : numbers) {
+        sum += n;
+        window.push_front(n);
+
+        while (sum > target and window.size() > 0) {
+            sum -= window.back();
+            window.pop_back();
+        }
+
+        if (sum == target) {
+            break;
+        }
+    }
+
+    auto min = window.front();
+    auto max = window.front();
+
+    for (auto n : window) {
+        min = std::min(min, n);
+        max = std::max(max, n);
+    }
+
+    cout << "Encryption weakness " << min + max << endl;
+
     return 0;
 }
 
-bool validate(unordered_map<int, int> & counts, int target)
+bool validate(unordered_map<long int, long int> & counts, long int target)
 {
     for(const auto item : counts) {
         auto remainder = target - item.first;
