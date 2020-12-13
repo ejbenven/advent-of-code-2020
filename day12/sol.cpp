@@ -14,9 +14,11 @@ using std::make_unique;
 using std::vector;
 
 struct ship_t {
-    int x;
-    int y;
+    long int x;
+    long int y;
     int alpha;
+    long int wayX;
+    long int wayY;
 };
 
 class Command {
@@ -27,7 +29,7 @@ class Command {
 
 class Move : public Command {
     public:
-        Move(int x, int y) : x(x), y(y) {}
+        Move(long int x, long int y) : x(x), y(y) {}
 
         ship_t exec(ship_t ship) const
         {
@@ -38,8 +40,8 @@ class Move : public Command {
         }
 
     private:
-        int x;
-        int y;
+        long int x;
+        long int y;
 
 };
 
@@ -63,7 +65,7 @@ class Rotate : public Command {
 
 class Forward : public Command {
     public:
-        Forward(int unit) : unit(unit) {}
+        Forward(long int unit) : unit(unit) {}
 
         ship_t exec(ship_t ship) const
         {
@@ -88,11 +90,87 @@ class Forward : public Command {
         }
 
     private:
-        int unit;
+        long int unit;
 
 };
 
+class MoveWay : public Command {
+    public:
+        MoveWay(long int x, long int y) : x(x), y(y) {}
+
+        ship_t exec(ship_t ship) const
+        {
+            ship.wayX += this->x;
+            ship.wayY += this->y;
+
+            return ship;
+        }
+
+    private:
+        long int x;
+        long int y;
+
+};
+
+class RotateWay : public Command {
+    public:
+        RotateWay(int alpha)
+        {
+            alpha %= 360;
+            alpha = alpha < 0 ? alpha + 360 : alpha;
+
+            this->alpha = alpha;
+        }
+
+        ship_t exec(ship_t ship) const
+        {
+            long int x = ship.wayX;
+            long int y = ship.wayY;
+            if(this->alpha == 0) { }
+            else if (this->alpha ==  90) {
+                x = -ship.wayY;
+                y = ship.wayX;
+            } else if (this->alpha == 180) {
+                x = -ship.wayX;
+                y = -ship.wayY;
+            } else if (this->alpha == 270) {
+                x = ship.wayY;
+                y = -ship.wayX;
+            } else {
+                cout << "ERROR, unexpected angle: " << this->alpha << endl;
+            }
+
+            ship.wayX = x;
+            ship.wayY = y;
+
+            return ship;
+        }
+
+    private:
+        int alpha;
+
+};
+
+class ForwardWay : public Command {
+    public:
+        ForwardWay(long int unit) : unit(unit) {}
+
+        ship_t exec(ship_t ship) const
+        {
+            ship.x += this->unit * ship.wayX;
+            ship.y += this->unit * ship.wayY;
+
+            return ship;
+        }
+
+    private:
+        long int unit;
+
+};
+
+
 unique_ptr<Command> parse(string line);
+unique_ptr<Command> parseWay(string line);
 
 int main() {
     std::ifstream input;
@@ -107,6 +185,21 @@ int main() {
     input.close();
 
     ship_t ship = {0, 0, 0};
+    for (const auto& command : commands) {
+        ship = command->exec(ship);
+    }
+
+    cout << std::abs(ship.x) + std::abs(ship.y) << endl;
+
+    input.open("day12/input.txt");
+    //input.open("day12/test_input.txt");
+    commands.clear();
+    while(std::getline(input, line)) {
+        commands.push_back(parseWay(line));
+    }
+    input.close();
+
+    ship = {0, 0, 0, 10, 1};
     for (const auto& command : commands) {
         ship = command->exec(ship);
     }
@@ -129,6 +222,24 @@ unique_ptr<Command> parse(string line)
     else if (id == "L") { ans = make_unique<Rotate>(arg); }
     else if (id == "R") { ans = make_unique<Rotate>(-arg); }
     else if (id == "F") { ans = make_unique<Forward>(arg); }
+    else { cout << "unexpected cmd" << endl; }
+
+    return ans;
+}
+
+unique_ptr<Command> parseWay(string line)
+{
+    string id = string(1, line[0]);
+    int arg = std::stoi(line.substr(1, line.size()-1));
+    unique_ptr<Command> ans;
+
+    if (id == "N") { ans = make_unique<MoveWay>(0, arg); }
+    else if (id == "S") { ans = make_unique<MoveWay>(0, -arg); }
+    else if (id == "E") { ans = make_unique<MoveWay>(arg, 0); }
+    else if (id == "W") { ans = make_unique<MoveWay>(-arg, 0); }
+    else if (id == "L") { ans = make_unique<RotateWay>(arg); }
+    else if (id == "R") { ans = make_unique<RotateWay>(-arg); }
+    else if (id == "F") { ans = make_unique<ForwardWay>(arg); }
     else { cout << "unexpected cmd" << endl; }
 
     return ans;
